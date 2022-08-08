@@ -14,8 +14,13 @@
  * often used before log entrys.
  * @param {"local"|"date-now"|"onlytime"} timeShematic defines the timezone shematich fort the clock th work with
  * @param {number} maxLength maximum length a timestamp can have to enshure a uniform look
+ * @param {boolean} [dissable] toggle timestamp generation
+ * @return {string} human readable timestamp
  */
-module.exports = function (timeShematic, maxLength) {
+module.exports = function (timeShematic, maxLength, dissable) {
+    if (dissable) {
+        return "";
+    };
     var dateNow = new Date();
     var timestampGeneric = "";
     switch (timeShematic) {
