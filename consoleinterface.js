@@ -114,7 +114,7 @@ module.exports = class {
     };
 
     /**
-     * 
+     * Displays and loggs a simpla warning message in the console.
      * @param {*} message 
      */
     logWarning (message) {
