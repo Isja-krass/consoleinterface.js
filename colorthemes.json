@@ -7,6 +7,9 @@
         "grayed": "\u001b[30;1m",
         "operation": "\u001b[36m",
         "info": "\u001b[35m",
-        "neutral": ""
+        "neutral": "",
+        "tokens": {
+            
+        }
     }
 }

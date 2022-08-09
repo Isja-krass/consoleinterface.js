@@ -114,7 +114,7 @@ module.exports = class {
     };
 
     /**
-     * Displays and loggs a simpla warning message in the console.
+     * Displays and loggs a simple warning message in the console.
      * @param {*} message 
      */
     logWarning (message) {
@@ -129,6 +129,33 @@ module.exports = class {
                 {role: "danger", text: "!WRN"},
                 {role: "neutral", text: ": "},
                 {role: "grayed", text: message},
+            ], this.colorTheme, !this.useFormatting) + "\n");
+        };
+    };
+
+
+    /**
+     * Displays and loggs a simple error message.
+     * @param {number} code Error- or ErrorFamily code numeric
+     * @param {string} errClass Error class / descriptor
+     * @param {string} message An error message to inform the user what went wrong
+     */
+    logError (code, errClass, message) {
+        if (this.globalLogLevel == "fatal") {
+            return;
+        } else {
+            if (this.logfile.path != "") {
+                this.fsloggerHandle.append(chrono(this.chrono, this.chonoLength, !this.useTimestamps) + " !ERR: [" + code + "]" + errClass + ":: " + message);
+            };
+            this.cout(colorizer([
+                {role: "grayed", text: chrono(this.chrono, this.chonoLength, !this.useTimestamps)},
+                {role: "error", text: "!ERR"},
+                {role: "neutral", text: ": ["},
+                {role: "info", text: code},
+                {role: "neutral", text: "]"},
+                {role: "error", text: errClass},
+                {role: "neutral", text: ":: "},
+                {role: "dissabeld", text: message}
             ], this.colorTheme, !this.useFormatting) + "\n");
         };
     };
