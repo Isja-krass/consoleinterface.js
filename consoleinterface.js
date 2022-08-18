@@ -51,6 +51,10 @@ module.exports = class {
             tignoreClasses: [],
         };
 
+        // Status Registers
+        this.register = {};
+        this.register.operations = {};
+
     };
 
     /**
@@ -133,12 +137,12 @@ module.exports = class {
         };
     };
 
-
     /**
      * Displays and loggs a simple error message.
      * @param {number} code Error- or ErrorFamily code numeric
      * @param {string} errClass Error class / descriptor
      * @param {string} message An error message to inform the user what went wrong
+     * @returns {object} Error inforamtion for handlers
      */
     logError (code, errClass, message) {
         if (this.globalLogLevel == "fatal") {
@@ -158,6 +162,77 @@ module.exports = class {
                 {role: "dissabeld", text: message}
             ], this.colorTheme, !this.useFormatting) + "\n");
         };
+        return {name: errClass, message: message, stack: ""};
     };
+
+    /**
+     * Displays an operation and informs about the status of every subfunction.
+     * @param {"still"|"oneshot"|"event"|"loop"} trigger Describes how the operation was triggerd.
+     * @param {string} descriptor Describes the operation (AKA "opration_class").
+     * @param {object} data[] Data returned from the operation.
+     * @param {string} data.name[] Name of the subfunction.
+     * @param {string} data.descriptor Description of what was done.
+     * @param {bool} data.sucessor Subfunction ended with a sucess.
+     * @param {bool} sucess Operation was sucessfull.
+     */
+    operation (trigger, descriptor, data, sucess) {
+        this.cout(colorizer([
+            {role: "grayed", text: chrono(this.chrono, this.chonoLength, !this.useTimestamps)},
+            {role: "operation", text: "OPERATION"},
+            {role: "neutral", text: ": "},
+            {role: "info", text: trigger},
+            {role: "neutral", text: "|"},
+            {role: "dissabeld", text: descriptor}
+        ], this.colorTheme, !this.useFormatting) + "\n")
+        var spacer = chrono(this.chrono, this.chonoLength, !this.useTimestamps).length;
+        var emptySpace = "";
+        for (var i = 0; i < spacer; i++) {
+            emptySpace = emptySpace  + " ";
+        };
+        this.cout(colorizer([
+            {role: "neutral", text: emptySpace + "───┰─────"},
+        ], this.colorTheme, !this.useFormatting) + "\n");
+        data.forEach(element => {
+            if (element.sucessor) {
+                this.cout(colorizer([
+                    {role: "neutral", text: emptySpace + "   ┣ "},
+                    {role: "operation", text: element.name},
+                    {role: "neutral", text: ": "},
+                    {role: "grayed", text: element.descriptor},
+                    {role: "neutral", text: " >> "},
+                    {role: "good", text: "SUCESS"}
+                ], this.colorTheme, !this.useFormatting) + "\n");
+            } else {
+                this.cout(colorizer([
+                    {role: "neutral", text: emptySpace + "   ┣ "},
+                    {role: "operation", text: element.name},
+                    {role: "neutral", text: ": "},
+                    {role: "grayed", text: element.descriptor},
+                    {role: "neutral", text: " >> "},
+                    {role: "error", text: "FAIL"}
+                ], this.colorTheme, !this.useFormatting) + "\n");
+            };
+        });
+        if (sucess) {
+            this.cout(colorizer([
+                {role: "neutral", text: emptySpace + "   ┗━━━ "},
+                {role: "dissabeld", text: "RESULT: "},
+                {role: "good", text: "OPERATION SUCESS"}
+            ], this.colorTheme, !this.useFormatting) + "\n");
+        } else {
+            this.cout(colorizer([
+                {role: "neutral", text: emptySpace + "   ┗━━━ "},
+                {role: "dissabeld", text: "RESULT: "},
+                {role: "error", text: "OPERATION FAILED"}
+            ], this.colorTheme, !this.useFormatting) + "\n");
+        }
+    };
+
+
+
+    
+    
+
+
 
 };
