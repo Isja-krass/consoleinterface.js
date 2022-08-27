@@ -11,5 +11,19 @@
         "tokens": {
             
         }
+    },
+
+    "amber-terminal": {
+        "good": "\u001b[32;2m",
+        "danger": "\u001b[33;3m",
+        "error": "\u001b[31;1m",
+        "dissabeld": "\u001b[33;1m",
+        "grayed": "\u001b[33;2m",
+        "operation": "\u001b[33;166m",
+        "info": "\u001b[32;1m",
+        "neutral": "\u001b[33m",
+        "tokens": {
+            
+        }
     }
 }

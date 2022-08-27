@@ -10,6 +10,7 @@
 const colorizer = require("./src/colorizer");
 const chrono = require("./src/chrono");
 const fslogger = require("./src/fslogger");
+const webhook = require("./src/webhook");
 
 /// EXPORT MASTER MODULE ///
 module.exports = class {
@@ -25,7 +26,7 @@ module.exports = class {
      * @param {string} options.ignoreClasses[] ignore speziffic event and error classes (default: none)
      * @param {"local"|"date-now"|"onlytime"} options.chrono set the chrono-shematic used for console timestamps (default: 'local')
      * @param {number} options.chonoLength maximum timestamp length to enshure an uniform look
-     * @param {number} options.genericAnimationTick Ovarall console animation tick (default: 100ms)
+     * @param {number} options.genericAnimationTick Overall console animation tick (default: 100ms)
      * @param {"nobe"|"typenwriter"|"flash"|"fade"|"magic"} options.animation decorative animation (default: 'none')
      */
     constructor (options) {
@@ -48,12 +49,18 @@ module.exports = class {
             includeTimestamps: true,
             logVisualision: false,
             logLevel: "warning",
-            tignoreClasses: [],
+            ignoreClasses: [],
         };
 
-        // Status Registers
-        this.register = {};
-        this.register.operations = {};
+        // default values for webhook
+        this.webhook = {
+            webhookURL: "",
+            ignoreClasses: [],
+            logLevel: "error",
+            includeStack: true,
+            includeSensitiveInformation: false,
+            style: "text",
+        };
 
     };
 
@@ -61,33 +68,61 @@ module.exports = class {
      * Initialise the File-Logger. The file logger enables events to be logged in a file for later diagnostics
      * or the archive. REMEMBER: if a file already saved it will be overwritten!
      * @param {string} path filepath where the logfile will be written
-     * @param {object} options options pass to the file-logger
+     * @param {object} options options passed to the file-logger
      * @param {boolean} options.logUserinput controls if user input should be present in the logfile (default: false)  
      * @param {boolean} options.logVisualision controls if visualision like prograss-bars or tables should be present in the logfile (default: false)
      * @param {boolean} options.includeTimestamps enables timestamps for logfile (default: true)
      * @param {"all"|"warning"|"error"|"fatal"} options.logLevel level of the logfile (default: "warning")
-     * @param {string} options.ignoreClasses[] ignore speziffic classes fot the logfile (default: none)
+     * @param {string} options.ignoreClasses[] ignore speziffic classes for the logfile (default: none)
      */
     initLogfile (path, options) {
-        if (!path || typeof path != "string") {
-            throw {name: "0x10", class: "ERR_MISSING_ARGUMENTS", message: "The 'path' argument is missing or undefined"};
-        };
         this.logfile.path = path;
         if (options.logUserinput != undefined) {this.logfile.logUserinput = options.logUserinput};
         if (options.logVisualision != undefined) {this.logfile.logVisualision = options.logVisualision};
-        if (options.includeTimestamps != undefined) {this.logfile.useTimestamps = options.useTimestamps};
-        if (typeof options.logLevel == "string") {this.logfile.logLevel = options.logLevel};
         if (options.ignoreClasses != undefined) {this.logfile.tignoreClasses = options.ignoreClasses};
         this.fsloggerHandle = new fslogger(this.logfile.path, "a");
+    };
+
+    /**
+     * Initialise the webhook-cleant. The webhook-cient enabels you to get direct notfication of the programms stae
+     * via the free voice- and textchat service [Discord](https://discord.com). See [Discord webhook feature] ()
+     * for further informations.
+     * 
+     * Due to some text-channels are publicly visible:
+     * ! THERE IS NO VARANTY OF ANY KIND, FOR  PERSONAL, OR ANY OTHER KIND OF SENSITIVE INFORMATION NOT BEING LEAKED TO PUBLIC OR THIRD PARTIES! **
+     * 
+     * @param {string} webhookURL The webhook-URL provided to you by Discord
+     * @param {object} options options passed to the webhook-client 
+     * @param {string} options.igonoreClasses[] ignore speziffic classes for the webhook-client (default: none)
+     * @param {"all"|"warning"|"error"|"fatal"} options.logLevel level of the webhook-client (default: "error")
+     * @param {"text"|"embed"} options.style sets the display method (default: "text") 
+     * @param {boolean} options.includeStack include stack in case of an fatal error (default: true)
+     * @param {boolean} options.includeSensitiveInformation include sensitive information (default: false)
+     * @return {Promise} webhook object as described in the Discord API-Docs
+     */
+    initWebhook (webhookURL, options) {
+        this.webhook.webhookURL = webhookURL;
+        this.webhookHandle = new webhook(this.webhook.webhookURL);
+        if (options.igonoreClasses != undefined) {this.webhook.ignoreClasses = options.igonoreClasses};
+        if (typeof options.includeStack == "boolean") {this.webhook.includeStack = options.includeStack};
+        if (typeof options.includeSensitiveInformation == "boolean") {this.webhook.includeSensitiveInformation = options.includeSensitiveInformation};
+        if (typeof options.logLevel == "string") {this.webhook.logLevel = options.logLevel};
+        if (typeof options.style == "string") {this.webhook.style = options.style};
+        return new Promise((resolve, reject) => {
+            this.webhookHandle.get().then(result => {
+                if (result.isRejected) {
+                    reject(result);
+                } else {
+                    resolve(result);
+                };
+            });
+        });
     };
 
     /**
      * Closes the logifile and shuts down the stream
      */
     dropLogfile () {
-        if (!this.fsloggerHandle) {
-            throw {name: "0x10", class: "ERR_MISSING_ARGUMENTS", message: "The 'fs::handle' argument is missing or undefined"};
-        };
         this.fsloggerHandle.close();
     };
 
@@ -108,7 +143,9 @@ module.exports = class {
             return;
         } else {
             if (this.logfile.path != "") {
-                this.fsloggerHandle.append(chrono(this.chrono, this.chonoLength, !this.useTimestamps) + " " + message);
+                if (this.logfile.logLevel =! "warning" && this.logfile.logLevel != "error" && this.logfile.logLevel != "fatal") {
+                    this.fsloggerHandle.append(chrono(this.chrono, this.chonoLength, !this.logfile.includeTimestamps) + " " + message);
+                };
             };
             this.cout(colorizer([
                 {role: "grayed", text: chrono(this.chrono, this.chonoLength, !this.useTimestamps)},
@@ -126,7 +163,9 @@ module.exports = class {
             return;
         } else {
             if (this.logfile.path != "") {
-                this.fsloggerHandle.append(chrono(this.chrono, this.chonoLength, !this.useTimestamps) + " !WRN: " + message);
+                if (this.logfile.logLevel != "error" && this.logfile.logLevel != "fatal") {
+                    this.fsloggerHandle.append(chrono(this.chrono, this.chonoLength, !this.logfile.includeTimestamps) + " !WRN: " + message);
+                };
             };
             this.cout(colorizer([
                 {role: "grayed", text: chrono(this.chrono, this.chonoLength, !this.useTimestamps)},
@@ -149,18 +188,24 @@ module.exports = class {
             return;
         } else {
             if (this.logfile.path != "") {
-                this.fsloggerHandle.append(chrono(this.chrono, this.chonoLength, !this.useTimestamps) + " !ERR: [" + code + "]" + errClass + ":: " + message);
+                if (!this.logfile.ignoreClasses.includes(errClass)) {
+                    if (this.logfile.logLevel != "fatal"){
+                        this.fsloggerHandle.append(chrono(this.chrono, this.chonoLength, !this.logfile.includeTimestamps) + " !ERR: [" + code + "]" + errClass + ":: " + message);   
+                    };
+                };
             };
-            this.cout(colorizer([
-                {role: "grayed", text: chrono(this.chrono, this.chonoLength, !this.useTimestamps)},
-                {role: "error", text: "!ERR"},
-                {role: "neutral", text: ": ["},
-                {role: "info", text: code},
-                {role: "neutral", text: "]"},
-                {role: "error", text: errClass},
-                {role: "neutral", text: ":: "},
-                {role: "dissabeld", text: message}
-            ], this.colorTheme, !this.useFormatting) + "\n");
+            if (!this.ignoreClasses.includes(errClass)) {
+                this.cout(colorizer([
+                    {role: "grayed", text: chrono(this.chrono, this.chonoLength, !this.useTimestamps)},
+                    {role: "error", text: "!ERR"},
+                    {role: "neutral", text: ": ["},
+                    {role: "info", text: code},
+                    {role: "neutral", text: "]"},
+                    {role: "error", text: errClass},
+                    {role: "neutral", text: ":: "},
+                    {role: "dissabeld", text: message}
+                ], this.colorTheme, !this.useFormatting) + "\n");
+            };
         };
         return {name: errClass, message: message, stack: ""};
     };
@@ -176,6 +221,9 @@ module.exports = class {
      * @param {bool} sucess Operation was sucessfull.
      */
     operation (trigger, descriptor, data, sucess) {
+        if (this.globalLogLevel == "warning" || this.globalLogLevel == "error" || this.globalLogLevel == "fatal") {
+            return;
+        };
         this.cout(colorizer([
             {role: "grayed", text: chrono(this.chrono, this.chonoLength, !this.useTimestamps)},
             {role: "operation", text: "OPERATION"},
@@ -188,6 +236,10 @@ module.exports = class {
         var emptySpace = "";
         for (var i = 0; i < spacer; i++) {
             emptySpace = emptySpace  + " ";
+        };
+        if (this.logfile.path != "") {
+            
+            
         };
         this.cout(colorizer([
             {role: "neutral", text: emptySpace + "───┰─────"},
@@ -227,12 +279,4 @@ module.exports = class {
             ], this.colorTheme, !this.useFormatting) + "\n");
         }
     };
-
-
-
-    
-    
-
-
-
 };
