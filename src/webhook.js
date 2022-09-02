@@ -9,11 +9,11 @@
  * IMPORTANT NOTE:
  * This part of the code comunicates with the [Discord API](https://https://discord.com/developers/docs).
  * Discord is a free text and voice chat service, providing an easy way to send messages directly into text-chanels via a vieiw
- * JSON request. Please note that the informations you may send over the code below are leaving your devica and get transmittet to
+ * JSON request. Please note that the informations you may send over the code below are leaving your device and get transmittet to
  * the Discord API-Server. Nigther the developers, contribotrs or publishers ar affiliated with the company "Discord".
  * 
  * Due to some text-channels are publicly visible:
- * ** ! THERE IS NO VARANTY OF ANY KIND, FOR  PERSONAL, OR ANY OTHER KIND OF SENSITIVE INFORMATION NOT BEING LEAKED TO PUBLIC OR THIRD PARTIES! **
+ * **! PERSONAL, OR ANY OTHER KIND OF SENSITIVE INFORMATION MAY BE LEAKED TO PUBLIC OR THIRD PARTIES !**
  * 
  * =============================================================================
  */
@@ -39,6 +39,7 @@ module.exports = class {
      */
     get () {
         return new Promise((resolve, reject) => {
+            var chunkData = "";
             this.request = HTTPS.request({
                 host: "discord.com",
                 path: `/api/webhooks/${this.id}/${this.token}`,
@@ -48,10 +49,17 @@ module.exports = class {
                 }
             }, (res) => {
                 res.on("data", (chunk) => {
-                    resolve(JSON.parse(chunk.toString()));
+                    chunkData = chunk
                 });
                 res.on("error", (err) => {
                     reject(err);
+                });
+                res.on("end", () => {
+                    if (res.statusCode == 200) {
+                        resolve(chunkData.toString());
+                    } else {
+                        reject();
+                    };
                 });
             });
             this.request.end();
@@ -68,7 +76,7 @@ module.exports = class {
      * @param {object} data.components[] array of message components
      * @param {objects} data.embeds[] embedded rich content
      */
-    excute (data) {
+    execute (data) {
         this.request = HTTPS.request({
             host: "discord.com",
             path: `/api/webhooks/${this.id}/${this.token}`,
@@ -81,7 +89,7 @@ module.exports = class {
                 
             });
             res.on("end", () => {
-                
+    
             });
         });
         this.request.write(JSON.stringify(data));

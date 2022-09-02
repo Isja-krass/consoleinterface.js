@@ -89,7 +89,7 @@ module.exports = class {
      * for further informations.
      * 
      * Due to some text-channels are publicly visible:
-     * ! THERE IS NO VARANTY OF ANY KIND, FOR  PERSONAL, OR ANY OTHER KIND OF SENSITIVE INFORMATION NOT BEING LEAKED TO PUBLIC OR THIRD PARTIES! **
+     * **! PERSONAL, OR ANY OTHER KIND OF SENSITIVE INFORMATION MAY BE LEAKED TO PUBLIC OR THIRD PARTIES !**
      * 
      * @param {string} webhookURL The webhook-URL provided to you by Discord
      * @param {object} options options passed to the webhook-client 
@@ -110,8 +110,7 @@ module.exports = class {
         if (typeof options.style == "string") {this.webhook.style = options.style};
         return new Promise((resolve, reject) => {
             this.webhookHandle.get().then(result => {
-                if (result.isRejected) {
-                    reject(result);
+                if (result.isRejected) { 
                 } else {
                     resolve(result);
                 };
@@ -143,8 +142,25 @@ module.exports = class {
             return;
         } else {
             if (this.logfile.path != "") {
-                if (this.logfile.logLevel =! "warning" && this.logfile.logLevel != "error" && this.logfile.logLevel != "fatal") {
+                if (this.logfile.logLevel != "warning" && this.logfile.logLevel != "error" && this.logfile.logLevel != "fatal") {
                     this.fsloggerHandle.append(chrono(this.chrono, this.chonoLength, !this.logfile.includeTimestamps) + " " + message);
+                };
+            };
+            if (this.webhook.webhookURL.length != "") {
+                if (this.webhook.logLevel != "warning" && this.webhook.logLevel != "error" && this.webhook.logLevel != "fatal") {
+                    switch (this.webhook.style) {
+                        default:
+                            this.webhookHandle.execute({
+                                content: `${message}`
+                            });
+                        break;
+                        case "embed":
+                            this.webhookHandle.execute({embeds: [{
+                                color: 6323595,
+                                description: `${message}`
+                            }]})
+                        break;
+                    };
                 };
             };
             this.cout(colorizer([
@@ -156,7 +172,7 @@ module.exports = class {
 
     /**
      * Displays and loggs a simple warning message in the console.
-     * @param {*} message 
+     * @param {string} message warning message
      */
     logWarning (message) {
         if (this.globalLogLevel == "error" || this.globalLogLevel == "fatal") {
@@ -165,6 +181,24 @@ module.exports = class {
             if (this.logfile.path != "") {
                 if (this.logfile.logLevel != "error" && this.logfile.logLevel != "fatal") {
                     this.fsloggerHandle.append(chrono(this.chrono, this.chonoLength, !this.logfile.includeTimestamps) + " !WRN: " + message);
+                };
+            };
+            if (this.webhook.webhookURL.length != "") {
+                if (this.webhook.logLevel != "error" && this.webhook.logLevel != "fatal") {
+                    switch (this.webhook.style) {
+                        default:
+                            this.webhookHandle.execute({
+                                content: `:warning: **!WRN**: ${message}`
+                            });
+                        break;
+                        case "embed":
+                            this.webhookHandle.execute({embeds: [{
+                                color: 16776960,
+                                title: ":warning: WARNING:",
+                                description: `${message}`
+                            }]})
+                        break;
+                    };
                 };
             };
             this.cout(colorizer([
@@ -191,6 +225,28 @@ module.exports = class {
                 if (!this.logfile.ignoreClasses.includes(errClass)) {
                     if (this.logfile.logLevel != "fatal"){
                         this.fsloggerHandle.append(chrono(this.chrono, this.chonoLength, !this.logfile.includeTimestamps) + " !ERR: [" + code + "]" + errClass + ":: " + message);   
+                    };
+                };
+            };
+            if (this.webhook.webhookURL.length != "") {
+                if (this.webhook.logLevel != "fatal") {
+                    switch (this.webhook.style) {
+                        default:
+                            this.webhookHandle.execute({
+                                content: `:x: **!ERR**: ${code}|${errClass}:: ${message}`
+                            });
+                        break;
+                        case "embed":
+                            this.webhookHandle.execute({embeds: [{
+                                color: 15548997,
+                                title: ":x: ERROR:",
+                                fields: [
+                                    {name: "Code:", value: code, inline: true},
+                                    {name: "error Class:", value: errClass, inline: true},
+                                    {name: "message:", value: "```" + message + "```", inline: false}
+                                ]
+                            }]})
+                        break;
                     };
                 };
             };
