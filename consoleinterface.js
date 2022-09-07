@@ -1,8 +1,11 @@
 /**
  * ===[ INFO ]==================================================================
- *  
- * 
- * 
+ * @file ./consoleinterface.js
+ * @brief The consoleinterface++ module from the PAUL toolkit portrtet to javascript.
+ * @created 03-08-2022@14:21:12.125
+ * @author isja_krass
+ * @version 0.0.1
+ * @repoURL https://github.com/Isja-krass/consoleinterface
  * =============================================================================
  */
 
@@ -27,7 +30,7 @@ module.exports = class {
      * @param {"local"|"date-now"|"onlytime"} options.chrono set the chrono-shematic used for console timestamps (default: 'local')
      * @param {number} options.chonoLength maximum timestamp length to enshure an uniform look
      * @param {number} options.genericAnimationTick Overall console animation tick (default: 100ms)
-     * @param {"nobe"|"typenwriter"|"flash"|"fade"|"magic"} options.animation decorative animation (default: 'none')
+     * @param {"none"|"typenwriter"} options.animation decorative animation (default: 'none')
      */
     constructor (options) {
 
@@ -38,7 +41,7 @@ module.exports = class {
         if (typeof options.colorTheme != "string") {this.colorTheme = "neo-console"} else {this.colorTheme = options.colorTheme};
         if (typeof options.ignoreClasses == "undefined") {this.ignoreClasses = []} else {this.ignoreClasses = options.ignoreClasses};
         if (typeof options.chrono != "string") {this.chrono = "local"} else {this.chrono = options.chrono};
-        if (typeof options.genericAnimationTick != "number") {this.genericAnimationTick = 100} else {this.genericAnimationTick = options.genericAnimationTick};
+        if (typeof options.genericAnimationTick != "number") {this.genericAnimationTick = 30} else {this.genericAnimationTick = options.genericAnimationTick};
         if (options.chonoLength == 0  || !options.chonoLength || typeof chonoLength != "number") {this.chonoLength = 12} else {this.chonoLength = options.chonoLength};
         if (typeof options.animation != "string") {this.animation = "none"} else {this.animation = options.animation};
 
@@ -96,15 +99,13 @@ module.exports = class {
      * @param {string} options.igonoreClasses[] ignore speziffic classes for the webhook-client (default: none)
      * @param {"all"|"warning"|"error"|"fatal"} options.logLevel level of the webhook-client (default: "error")
      * @param {"text"|"embed"} options.style sets the display method (default: "text") 
-     * @param {boolean} options.includeStack include stack in case of an fatal error (default: true)
      * @param {boolean} options.includeSensitiveInformation include sensitive information (default: false)
-     * @return {Promise} webhook object as described in the Discord API-Docs
+     * @return {Promise<object>} webhook object as described in the Discord API-Docs
      */
     initWebhook (webhookURL, options) {
         this.webhook.webhookURL = webhookURL;
         this.webhookHandle = new webhook(this.webhook.webhookURL);
         if (options.igonoreClasses != undefined) {this.webhook.ignoreClasses = options.igonoreClasses};
-        if (typeof options.includeStack == "boolean") {this.webhook.includeStack = options.includeStack};
         if (typeof options.includeSensitiveInformation == "boolean") {this.webhook.includeSensitiveInformation = options.includeSensitiveInformation};
         if (typeof options.logLevel == "string") {this.webhook.logLevel = options.logLevel};
         if (typeof options.style == "string") {this.webhook.style = options.style};
@@ -130,7 +131,24 @@ module.exports = class {
      * @param {any} message data to write
      */
     cout (message) {
-        process.stdout.write(message + "");
+        switch (this.animation) {
+            default: 
+                process.stdout.write(message + "");
+            break;
+            case "typenwriter":
+                var msgArray = message.split("");
+                var step = 0
+                var intervall = setInterval(() => {
+                    if (step == msgArray.length) {
+                        clearInterval(intervall);
+                    } else {
+                        process.stdout.write(msgArray[step] + "");
+                        step++;
+                    };
+                }, this.genericAnimationTick);
+            break;
+        };
+
     };
 
     /**
@@ -218,7 +236,7 @@ module.exports = class {
      * @returns {object} Error inforamtion for handlers
      */
     logError (code, errClass, message) {
-        if (this.globalLogLevel == "fatal") {
+        if (this.globalLogLevel == "fatal" && this.ignoreClasses.includes(errClass)) {
             return;
         } else {
             if (this.logfile.path != "") {
@@ -228,7 +246,7 @@ module.exports = class {
                     };
                 };
             };
-            if (this.webhook.webhookURL.length != "") {
+            if (this.webhook.webhookURL.length != "" && !this.webhook.ignoreClasses.includes(errClass)) {
                 if (this.webhook.logLevel != "fatal") {
                     switch (this.webhook.style) {
                         default:
@@ -280,6 +298,32 @@ module.exports = class {
         if (this.globalLogLevel == "warning" || this.globalLogLevel == "error" || this.globalLogLevel == "fatal") {
             return;
         };
+        if (this.logfile.path =! "") {
+            if (this.logfile.logLevel != "warning" && this.logfile.logLevel != "error" && this.logfile.logLevel != "fatal") {
+                if (this.logfile.logVisualision) {
+                    
+                } else {
+                    
+                };
+            };
+        };
+        if (this.webhook.webhookURL.length != "") {
+            if (this.webhook.logLevel != "warning" && this.webhook.logLevel != "error" && this.webhook.logLevel != "fatal") {
+                switch (this.webhook.style) {
+                    default:
+                        this.webhookHandle.execute({
+                            
+                        });
+                    break;
+                    case "embed":
+                        this.webhookHandle.execute({embeds: [{
+                            
+                        
+                        }]})
+                    break;
+                };
+            };
+        };
         this.cout(colorizer([
             {role: "grayed", text: chrono(this.chrono, this.chonoLength, !this.useTimestamps)},
             {role: "operation", text: "OPERATION"},
@@ -292,10 +336,6 @@ module.exports = class {
         var emptySpace = "";
         for (var i = 0; i < spacer; i++) {
             emptySpace = emptySpace  + " ";
-        };
-        if (this.logfile.path != "") {
-            
-            
         };
         this.cout(colorizer([
             {role: "neutral", text: emptySpace + "───┰─────"},
@@ -323,9 +363,7 @@ module.exports = class {
         });
         if (sucess) {
             this.cout(colorizer([
-                {role: "neutral", text: emptySpace + "   ┗━━━ "},
-                {role: "dissabeld", text: "RESULT: "},
-                {role: "good", text: "OPERATION SUCESS"}
+                {role: "neutral", text: emptySpace + "   ┗━━━ "},warning
             ], this.colorTheme, !this.useFormatting) + "\n");
         } else {
             this.cout(colorizer([
@@ -335,4 +373,167 @@ module.exports = class {
             ], this.colorTheme, !this.useFormatting) + "\n");
         }
     };
+
+    /**
+     * Ask the user to enter a value ant returns it as string.
+     * @param {boolean} [displayPräambel] toggles the Präambel (default: true)
+     * @returns {Promise<string>} Input given by the user as string
+     */
+    getString (displayPräambel) {
+        if (displayPräambel || displayPräambel == undefined) {
+            this.cout(colorizer([
+                {role: "dissabeld", text: "INPUT"},
+                {role: "neutral", text: " ["},
+                {role: "info", text: "string"},
+                {role: "neutral", text: "] << "},
+            ], this.colorTheme, !this.useFormatting)); 
+        };
+        return new Promise((resolve, reject) => {
+            var linstener = process.stdin.on("data", (rawData) => {
+                var input = rawData.toString();if (this.logfile.path != "" && this.logfile.logUserinput) {
+                    this.fsloggerHandle.append(chrono(this.chrono, this.chonoLength, !this.logfile.includeTimestamps) + ` [USER-INPUT]: as 'bool':: ${input}`);
+                };
+                if (input.lengt == 0 || input == undefined || input == null) {
+                    reject(null);
+                    linstener.destroy();
+                    if (this.logfile.path != "" && this.logfile.logUserinput) {
+                        this.fsloggerHandle.append(chrono(this.chrono, this.chonoLength, !this.logfile.includeTimestamps) + ` [USER-INPUT]: input was 'undefined' or 'null'`);
+                    };
+                } else {
+                    resolve(input.replace(/\n/g, ""));
+                    linstener.destroy();
+                    if (this.logfile.path != "" && this.logfile.logUserinput) {
+                        this.fsloggerHandle.append(chrono(this.chrono, this.chonoLength, !this.logfile.includeTimestamps) + ` [USER-INPUT]: as 'string':: ${input}`);
+                    };
+                };
+            });
+        });
+    };
+
+    /**
+     * Ask the user to enter a value ant returns it as number.
+     * @param {boolean} [displayPräambel] toggles the Präambel (default: true)
+     * @returns {Promise<number>} Input given by the user as number
+     */
+    getNumber (displayPräambel) {
+        if (displayPräambel || displayPräambel == undefined) {
+            this.cout(colorizer([
+                {role: "dissabeld", text: "INPUT"},
+                {role: "neutral", text: " ["},
+                {role: "info", text: "number"},
+                {role: "neutral", text: "] << "},
+            ], this.colorTheme, !this.useFormatting)); 
+        };
+        return new Promise((resolve, reject) => {
+            var listener = process.stdin.on("data", (rawData) => {
+                var input = rawData.toString();
+                if (input.length == 0 || input == undefined || input == null) {
+                    reject(null);
+                    listener.destroy();
+                    if (this.logfile.path != "" && this.logfile.logUserinput) {
+                        this.fsloggerHandle.append(chrono(this.chrono, this.chonoLength, !this.logfile.includeTimestamps) + ` [USER-INPUT]: input was 'undefined' or 'null'`);
+                    };
+                } else {
+                    var numberResolved = Number(input.replace(/\n/g, ""));
+                    listener.destroy();
+                    if (numberResolved == NaN) {
+                        if (this.logfile.path != "" && this.logfile.logUserinput) {
+                            this.fsloggerHandle.append(chrono(this.chrono, this.chonoLength, !this.logfile.includeTimestamps) + ` [USER-INPUT]: was not able to resolve 'number' out of '${input}' >> reject NULL `);
+                        };
+                        reject(null);
+                    } else {
+                        if (this.logfile.path != "" && this.logfile.logUserinput) {
+                            this.fsloggerHandle.append(chrono(this.chrono, this.chonoLength, !this.logfile.includeTimestamps) + ` [USER-INPUT]: as 'number':: ${numberResolved}`);
+                        };
+                        resolve(numberResolved);
+                    };
+                    
+                }; 
+            });
+        });
+
+    };
+
+    /**
+     * Ask the user to enter a value ant returns it as boolean.
+     * @param {boolean} displayPräambel toggles the Präambel (default: true)
+     * @returns {Promise<boolean>} Input given by the user as boolean
+     */
+    getBool (displayPräambel) {
+        if (displayPräambel || displayPräambel == undefined) {
+            this.cout(colorizer([
+                {role: "dissabeld", text: "INPUT"},
+                {role: "neutral", text: " ["},
+                {role: "info", text: "bool"},
+                {role: "neutral", text: "] << "},
+            ], this.colorTheme, !this.useFormatting)); 
+        };
+        return new Promise((resolve, reject) => {
+            var listener = process.stdin.on("data", (rawData) => {
+                var input = rawData.toString().replace(/\n/g, "").toLocaleLowerCase();
+                if (input.length == 0 || input == null || input == undefined) {
+                    reject(null);
+                    listener.destroy();
+                    if (this.logfile.path != "" && this.logfile.logUserinput) {
+                        this.fsloggerHandle.append(chrono(this.chrono, this.chonoLength, !this.logfile.includeTimestamps) + ` [USER-INPUT]: input was 'undefined' or 'null'`);
+                    };
+                } else {
+                    switch (input) {
+                        default: 
+                            reject(null);
+                            listener.destroy();
+                            if (this.logfile.path != "" && this.logfile.logUserinput) {
+                                this.fsloggerHandle.append(chrono(this.chrono, this.chonoLength, !this.logfile.includeTimestamps) + ` [USER-INPUT]: was not able to resolve 'bool' out of '${input}' >> reject NULL `);
+                            };
+                        break;
+                        case "true":
+                            listener.destroy();
+                            resolve(true);
+                            if (this.logfile.path != "" && this.logfile.logUserinput) {
+                                this.fsloggerHandle.append(chrono(this.chrono, this.chonoLength, !this.logfile.includeTimestamps) + ` [USER-INPUT]: as 'bool':: ${input}`);
+                            };
+                        break;
+                        case "false":
+                            listener.destroy();
+                            resolve(false);
+                            if (this.logfile.path != "" && this.logfile.logUserinput) {
+                                this.fsloggerHandle.append(chrono(this.chrono, this.chonoLength, !this.logfile.includeTimestamps) + ` [USER-INPUT]: as 'bool':: ${input}`);
+                            };
+                        break;
+                        case "yes":
+                            listener.destroy();
+                            resolve(true);
+                            if (this.logfile.path != "" && this.logfile.logUserinput) {
+                                this.fsloggerHandle.append(chrono(this.chrono, this.chonoLength, !this.logfile.includeTimestamps) + ` [USER-INPUT]: as 'bool':: ${input}`);
+                            };
+                        break;
+                        case "no":
+                            listener.destroy();
+                            resolve(false);if (this.logfile.path != "" && this.logfile.logUserinput) {
+                                this.fsloggerHandle.append(chrono(this.chrono, this.chonoLength, !this.logfile.includeTimestamps) + ` [USER-INPUT]: as 'bool':: ${input}`);
+                            };
+                            if (this.logfile.path != "" && this.logfile.logUserinput) {
+                                this.fsloggerHandle.append(chrono(this.chrono, this.chonoLength, !this.logfile.includeTimestamps) + ` [USER-INPUT]: as 'bool':: ${input}`);
+                            };
+                        break;
+                        case "0":
+                            listener.destroy();
+                            resolve(false);
+                            if (this.logfile.path != "" && this.logfile.logUserinput) {
+                                this.fsloggerHandle.append(chrono(this.chrono, this.chonoLength, !this.logfile.includeTimestamps) + ` [USER-INPUT]: as 'bool':: ${input}`);
+                            };
+                        break;
+                        case "1":
+                            listener.destroy();
+                            resolve(true);
+                            if (this.logfile.path != "" && this.logfile.logUserinput) {
+                                this.fsloggerHandle.append(chrono(this.chrono, this.chonoLength, !this.logfile.includeTimestamps) + ` [USER-INPUT]: as 'bool':: ${input}`);
+                            };
+                        break;
+                    };
+                };
+            });
+        });
+    };
+
 };
