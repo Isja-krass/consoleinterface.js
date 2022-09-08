@@ -13,22 +13,21 @@ text file or working with webhooks.
 
 #### Features and capabilities
 This module is desinged to:
-> 💻 Display simple warning, error and status messages on the screen
-> 📊 log-levels and classes to keep track of the iportant things
-> 🕳️ large logging-buffer to dump everything into (WIP)
-> 🪨 be minimal, using less dependencies as possible
-> 📁 logging into text files
-> 🎨 progress-bars, headers and other visualisation (WIP)
-> 👤 User iput prompts (WIP)
-> ... to be continued >> 
+    - 💻 Display simple warning, error and status messages on the screen
+    - 📊 log-levels and classes to keep track of the iportant things and ignore the junk
+    - 🪨 be minimal, using less dependencies as possible
+    - 📁 logging into text files
+    - 🎨 progress-bars, headers and other visualisation (WIP)
+    - 👤 User iput prompts
+    - ... to be continued >> 
 
 also worth mentioning:
-> 📑 [JS-doc](https://jsdoc.app/) awayabel for every function, clases and parmeters
-> ⚙️ customizable behaviour (nearly everything is variable)
-> 🌈 Colors and markedup text for better visualisation via [ANSI-escape-code](https://en.wikipedia.org/wiki/ANSI_escape_code)
+    - 📑 [JS-doc](https://jsdoc.app/) awayabel for every function, clases and parmeters
+    - ⚙️ customizable behaviour (nearly everything is variable)
+    - 🌈 Colors and markedup text for better visualisation via [ANSI-escape-code](https://en.wikipedia.org/wiki/ANSI_escape_code)
 
-**⚠️ NOTE**: The color and markdown featues may not work a Windows and IOS operating systems.
-You may required to enable the [virtual terminal mode](https://docs.microsoft.com/en/windows/console/console-virtual-terminal-sequences) for this.
+> **⚠️ NOTE**: The color and markdown featues may not work a Windows and IOS operating systems.
+> You may required to enable the [virtual terminal mode](https://docs.microsoft.com/en/windows/console/console-virtual-terminal-sequences) for this.
 
 ## TESTING, BUG-REPORTS AND FEATURE REQUESTS
 
@@ -41,8 +40,8 @@ If you find sutch a problem or anything that seems off, please open a new [issue
 If you familiar with the code and already figured out a possible solution simply add a [merge request](https://github.com/Isja-krass/consoleinterface/pulls).
 I will review any issue as soon as i can.
 
-**⚠️ NOTE**: Please check the repository first, before creating a new issue. There my be a simelar problem alredy known and on the
-way to be fixed.
+> **⚠️ NOTE**: Please check the repository first, before creating a new issue. There my be a simelar problem alredy known and on the
+> way to be fixed.
 
 #### Request a new feature
 I only have my speziffic point of view over this project. So if you think a new functionality or feature will by handy, pleas head over to
@@ -61,4 +60,4 @@ give me a short feedback how well it works. Especially becaus this module was on
 This is a small module, but it has more documentation as expected, so the documentation has been moved to  the [WIKI](https://github.com/Isja-krass/consoleinterface/wiki).
 There are also diversity of examples to start from.
 
-**⚠️ NOTE**: A large part o the documentation has been rewritten but a small amount is still undocumented and will be added later.
+> **⚠️ NOTE**: A large part o the documentation has been rewritten but a small amount is still undocumented and will be added later.
