@@ -83,6 +83,7 @@ module.exports = class {
         if (options.logUserinput != undefined) {this.logfile.logUserinput = options.logUserinput};
         if (options.logVisualision != undefined) {this.logfile.logVisualision = options.logVisualision};
         if (options.ignoreClasses != undefined) {this.logfile.tignoreClasses = options.ignoreClasses};
+        if (options.logLevel != undefined) {this.logfile.logLevel = options.logLevel};
         this.fsloggerHandle = new fslogger(this.logfile.path, "a");
     };
 
@@ -291,19 +292,29 @@ module.exports = class {
      * @param {object} data[] Data returned from the operation.
      * @param {string} data.name[] Name of the subfunction.
      * @param {string} data.descriptor Description of what was done.
-     * @param {bool} data.sucessor Subfunction ended with a sucess.
-     * @param {bool} sucess Operation was sucessfull.
+     * @param {bool} data.successor Subfunction ended with a success.
+     * @param {bool} success Operation was successfull.
      */
-    operation (trigger, descriptor, data, sucess) {
+    operation (trigger, descriptor, data, success) {
         if (this.globalLogLevel == "warning" || this.globalLogLevel == "error" || this.globalLogLevel == "fatal") {
             return;
         };
-        if (this.logfile.path =! "") {
-            if (this.logfile.logLevel != "warning" && this.logfile.logLevel != "error" && this.logfile.logLevel != "fatal") {
+        if (this.logfile.path != "") {
+            if (this.logfile.logLevel == "all") {
                 if (this.logfile.logVisualision) {
-                    
+                    this.fsloggerHandle.append(chrono(this.chrono, this.chonoLength, !this.logfile.includeTimestamps) + ` [OPERATION]: ${trigger}|${descriptor} >> ${success}`);
+                    data.forEach(element => {
+                        var successE = "";
+                        if (element.successor) {successE = "SUCCESS"} else {successE = "FAIL"};
+                        this.fsloggerHandle.append(`     ╠═ ${element.name}:: ${element.descriptor} >> ${successE}`); 
+                    });
                 } else {
-                    
+                    this.fsloggerHandle.append(chrono(this.chrono, this.chonoLength, !this.logfile.includeTimestamps) + ` [OPERATION]: ${trigger}|${descriptor} >> ${success}`);
+                    data.forEach(element => {
+                        var successE = "";
+                        if (element.successor) {successE = "SUCCESS"} else {successE = "FAIL"};
+                        this.fsloggerHandle.append(`=> ${element.name}:: ${element.descriptor} >> ${successE}`);   
+                    });
                 };
             };
         };
@@ -311,15 +322,28 @@ module.exports = class {
             if (this.webhook.logLevel != "warning" && this.webhook.logLevel != "error" && this.webhook.logLevel != "fatal") {
                 switch (this.webhook.style) {
                     default:
+                        var content = "";
+                        content = content + `:gear: OPERATION: ${trigger}|${descriptor} >> ${success}\n`;
+                        data.forEach(element => {
+                            content = content + `=> ${element.name}:: ${element.descriptor} >> ${element.successor}\n`;
+                        });
                         this.webhookHandle.execute({
-                            
+                            content: content,
                         });
                     break;
                     case "embed":
+                        var fields = [];
+                        data.forEach(element => {
+                            var successorEb = "";
+                            if (element.successor) {successorEb = ":white_check_mark: "} else {successorEb = ":x: "};
+                            fields.push({name: successorEb + element.name, value: element.descriptor, inline: false});
+                        });
                         this.webhookHandle.execute({embeds: [{
-                            
-                        
-                        }]})
+                            color: 1752220,
+                            title: ":gear: OPERATION",
+                            description: trigger + "|" + descriptor,
+                            fields: fields,
+                        }]});
                     break;
                 };
             };
@@ -341,14 +365,14 @@ module.exports = class {
             {role: "neutral", text: emptySpace + "───┰─────"},
         ], this.colorTheme, !this.useFormatting) + "\n");
         data.forEach(element => {
-            if (element.sucessor) {
+            if (element.successor) {
                 this.cout(colorizer([
                     {role: "neutral", text: emptySpace + "   ┣ "},
                     {role: "operation", text: element.name},
                     {role: "neutral", text: ": "},
                     {role: "grayed", text: element.descriptor},
                     {role: "neutral", text: " >> "},
-                    {role: "good", text: "SUCESS"}
+                    {role: "good", text: "SUCCESS"}
                 ], this.colorTheme, !this.useFormatting) + "\n");
             } else {
                 this.cout(colorizer([
@@ -361,9 +385,11 @@ module.exports = class {
                 ], this.colorTheme, !this.useFormatting) + "\n");
             };
         });
-        if (sucess) {
+        if (success) {
             this.cout(colorizer([
-                {role: "neutral", text: emptySpace + "   ┗━━━ "},warning
+                {role: "neutral", text: emptySpace + "   ┗━━━ "},
+                {role: "dissabeld", text: "RESULT: "},
+                {role: "good", text: "OPERATION SUCCESS"}
             ], this.colorTheme, !this.useFormatting) + "\n");
         } else {
             this.cout(colorizer([
