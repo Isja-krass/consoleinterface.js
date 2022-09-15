@@ -562,4 +562,15 @@ module.exports = class {
         });
     };
 
+    /**
+     * 
+     * @param {string} title 
+     * @param {string} description 
+     * @param {object} [data[]   
+     * @param {string} data.name 
+     * @param {any} data.value
+     */
+    writeHeader(title, description, data) {
+        
+    };
 };

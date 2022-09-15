@@ -13,18 +13,18 @@ text file or working with webhooks.
 
 #### Features and capabilities
 This module is desinged to:
-    - 💻 Display simple warning, error and status messages on the screen
-    - 📊 log-levels and classes to keep track of the iportant things and ignore the junk
-    - 🪨 be minimal, using less dependencies as possible
-    - 📁 logging into text files
-    - 🎨 progress-bars, headers and other visualisation (WIP)
-    - 👤 User iput prompts
-    - ... to be continued >> 
+- 💻 Display simple warning, error and status messages on the screen
+- 📊 log-levels and classes to keep track of the iportant things and ignore the junk
+- 🪨 be minimal, using less dependencies as possible
+- 📁 logging into text files
+- 🎨 progress-bars, headers and other visualisation (WIP)
+- 👤 User iput prompts
+- ... to be continued >> 
 
 also worth mentioning:
-    - 📑 [JS-doc](https://jsdoc.app/) awayabel for every function, clases and parmeters
-    - ⚙️ customizable behaviour (nearly everything is variable)
-    - 🌈 Colors and markedup text for better visualisation via [ANSI-escape-code](https://en.wikipedia.org/wiki/ANSI_escape_code)
+- 📑 [JS-doc](https://jsdoc.app/) awayabel for every function, clases and parmeters
+- ⚙️ customizable behaviour (nearly everything is variable)
+- 🌈 Colors and markedup text for better visualisation via [ANSI-escape-code](https://en.wikipedia.org/wiki/ANSI_escape_code)
 
 > **⚠️ NOTE**: The color and markdown featues may not work a Windows and IOS operating systems.
 > You may required to enable the [virtual terminal mode](https://docs.microsoft.com/en/windows/console/console-virtual-terminal-sequences) for this.
