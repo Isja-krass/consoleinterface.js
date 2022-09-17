@@ -14,6 +14,7 @@ const colorizer = require("./src/colorizer");
 const chrono = require("./src/chrono");
 const fslogger = require("./src/fslogger");
 const webhook = require("./src/webhook");
+const largeFont = require("./src/largeFont");
 
 /// EXPORT MASTER MODULE ///
 module.exports = class {
@@ -563,14 +564,20 @@ module.exports = class {
     };
 
     /**
-     * 
-     * @param {string} title 
-     * @param {string} description 
-     * @param {object} [data[]   
-     * @param {string} data.name 
-     * @param {any} data.value
+     * Writes a large unicede-blockfont header
+     * @param {string} title input text
+     * @param {string} [role] colorizer role 
      */
-    writeHeader(title, description, data) {
-        
+    writeHeader(title, role) {
+        var out = largeFont(title);
+        if (role == "" || role == undefined) { role = "neutral" };
+        if (this.logfile.path != "" && this.logfile.logVisualision) {
+            out.split("\n").forEach(outputLine => {
+                this.fsloggerHandle.append(chrono(this.chrono, this.chonoLength, !this.logfile.includeTimestamps) + outputLine);
+            });
+        };
+        this.cout(colorizer([
+            {role: role, text: out}
+        ], this.colorTheme, !this.useFormatting));
     };
 };
