@@ -468,10 +468,7 @@ module.exports = class {
                             this.fsloggerHandle.append(chrono(this.chrono, this.chonoLength, !this.logfile.includeTimestamps) + ` [USER-INPUT]: was not able to resolve 'number' out of '${input}' >> reject NULL `);
                         };
                         reject(null);
-                    } else {
-                        if (this.logfile.path != "" && this.logfile.logUserinput) {
-                            this.fsloggerHandle.append(chrono(this.chrono, this.chonoLength, !this.logfile.includeTimestamps) + ` [USER-INPUT]: as 'number':: ${numberResolved}`);
-                        };
+                    } else { 
                         resolve(numberResolved);
                     };
                     
@@ -580,4 +577,27 @@ module.exports = class {
             {role: role, text: out}
         ], this.colorTheme, !this.useFormatting));
     };
+
+    /**
+     * Creates an infoblock with given values and displays it
+     * @param {Array<object>} data array of data to display
+     * @param {string} data.name parameter display name 
+     * @param {any} data.value value of the parameter
+     * @param {number} spacer space between the parameter name and the value, should be larger than the length of the longest parameter name
+     */
+    INFOblock (data, spacer) {
+        var output = [];
+        data.forEach(element => {
+            var spacerCalc = spacer - element.name.length;
+            var spacerAdd = "";
+            for (var i = 0; i < spacerCalc; i++) {
+                spacerAdd = spacerAdd + " ";
+            };
+            output.push({role: "neutral", text: element.name + ":" + spacerAdd});
+            output.push({role: "info", text: element.value + "\n"});
+
+        });
+        this.cout(colorizer(output, this.colorTheme, !this.useFormatting));
+    };
+
 };
