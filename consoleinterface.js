@@ -36,6 +36,7 @@ module.exports = class {
     constructor (options) {
 
         // check defualt values
+        if (options == undefined) {options = {}};
         if (options.useFormatting == undefined) {this.useFormatting = true} else {this.useFormatting = options.useFormatting};
         if (options.useTimestamps == undefined) {this.useTimestamps = true} else {this.useTimestamps = options.useTimestamps};
         if (typeof options.globalLogLevel != "string") {this.globalLogLevel = "all"} else {this.globalLogLevel = options.globalLogLevel};
@@ -80,6 +81,7 @@ module.exports = class {
      * @param {string} options.ignoreClasses[] ignore speziffic classes for the logfile (default: none)
      */
     initLogfile (path, options) {
+        if (options == undefined) {options = {}};
         this.logfile.path = path;
         if (options.logUserinput != undefined) {this.logfile.logUserinput = options.logUserinput};
         if (options.logVisualision != undefined) {this.logfile.logVisualision = options.logVisualision};
@@ -105,6 +107,7 @@ module.exports = class {
      * @return {Promise<object>} webhook object as described in the Discord API-Docs
      */
     initWebhook (webhookURL, options) {
+        if (options == undefined) {options = {}};
         this.webhook.webhookURL = webhookURL;
         this.webhookHandle = new webhook(this.webhook.webhookURL);
         if (options.igonoreClasses != undefined) {this.webhook.ignoreClasses = options.igonoreClasses};
@@ -579,13 +582,13 @@ module.exports = class {
     };
 
     /**
-     * Creates an infoblock with given values and displays it
+     * Writes a simple list consisting of an display name followed by an parameter
      * @param {Array<object>} data array of data to display
      * @param {string} data.name parameter display name 
      * @param {any} data.value value of the parameter
      * @param {number} spacer space between the parameter name and the value, should be larger than the length of the longest parameter name
      */
-    INFOblock (data, spacer) {
+    writeList (data, spacer) {
         var output = [];
         data.forEach(element => {
             var spacerCalc = spacer - element.name.length;
@@ -595,7 +598,9 @@ module.exports = class {
             };
             output.push({role: "neutral", text: element.name + ":" + spacerAdd});
             output.push({role: "info", text: element.value + "\n"});
-
+            if (this.logfile.path != "" && this.logfile.logVisualision) {
+                this.fsloggerHandle.append(chrono(this.chrono, this.chonoLength, !this.logfile.includeTimestamps) + element.name + ":" + spacerAdd + element.value);
+            };
         });
         this.cout(colorizer(output, this.colorTheme, !this.useFormatting));
     };
