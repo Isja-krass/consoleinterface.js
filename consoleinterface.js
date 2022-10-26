@@ -15,6 +15,7 @@ const chrono = require("./src/chrono");
 const fslogger = require("./src/fslogger");
 const webhook = require("./src/webhook");
 const largeFont = require("./src/largeFont");
+const RID = require("./src/iniReader");
 
 /// EXPORT MASTER MODULE ///
 module.exports = class {
