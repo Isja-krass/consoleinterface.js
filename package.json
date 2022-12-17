@@ -1,8 +1,9 @@
 {
-    "name": "terminal-interface",
+    "name": "console-interface.js",
     "version": "0.0.1",
     "displayName": "com.exposed.consoleinterface",
     "description": "The consoleinterface++ module from the PAUL toolkit portrtet to javascript.",
+    "license": "MIT",
     "author": {
         "name": "isja_krass",
         "email": "isja_krass@project-exposed.de"
