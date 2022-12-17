@@ -33,6 +33,7 @@ module.exports = class {
      * @param {number} options.chonoLength maximum timestamp length to enshure an uniform look
      * @param {number} options.genericAnimationTick Overall console animation tick (default: 100ms)
      * @param {"none"|"typenwriter"} options.animation decorative animation (default: 'none')
+     * @param {boolean} options.enableDebug enable debugging messages (default: false)
      */
     constructor (options) {
 
@@ -47,6 +48,7 @@ module.exports = class {
         if (typeof options.genericAnimationTick != "number") {this.genericAnimationTick = 30} else {this.genericAnimationTick = options.genericAnimationTick};
         if (options.chonoLength == 0  || !options.chonoLength || typeof chonoLength != "number") {this.chonoLength = 12} else {this.chonoLength = options.chonoLength};
         if (typeof options.animation != "string") {this.animation = "none"} else {this.animation = options.animation};
+        if (options.enableDebug == undefined) {this.enableDebug = false} else {this.enableDebug = options.enableDebug};
 
         // default values for logfile
         this.logfile = {
@@ -537,7 +539,8 @@ module.exports = class {
                         break;
                         case "no":
                             listener.destroy();
-                            resolve(false);if (this.logfile.path != "" && this.logfile.logUserinput) {
+                            resolve(false);
+                            if (this.logfile.path != "" && this.logfile.logUserinput) {
                                 this.fsloggerHandle.append(chrono(this.chrono, this.chonoLength, !this.logfile.includeTimestamps) + ` [USER-INPUT]: as 'bool':: ${input}`);
                             };
                             if (this.logfile.path != "" && this.logfile.logUserinput) {
@@ -606,4 +609,16 @@ module.exports = class {
         this.cout(colorizer(output, this.colorTheme, !this.useFormatting));
     };
 
+    /**
+     * Prints a  debug message or notification
+     * @param {any} message debug message
+     */
+    debug (message) {
+        this.cout(colorizer([
+            {role: "grayed", text: chrono(this.chrono, this.chonoLength, !this.useTimestamps)},
+            {role: "good", text: " DEBUG"},
+            {role: "neutral", text: ": "},
+            {role: "dissabeld", text: message}
+        ], this.colorTheme, !this.useFormatting));
+    };
 };
