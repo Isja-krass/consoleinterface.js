@@ -614,11 +614,13 @@ module.exports = class {
      * @param {any} message debug message
      */
     debug (message) {
-        this.cout(colorizer([
-            {role: "grayed", text: chrono(this.chrono, this.chonoLength, !this.useTimestamps)},
-            {role: "good", text: " DEBUG"},
-            {role: "neutral", text: ": "},
-            {role: "dissabeld", text: message}
-        ], this.colorTheme, !this.useFormatting));
+        if (this.enableDebug) {
+            this.cout(colorizer([
+                {role: "grayed", text: chrono(this.chrono, this.chonoLength, !this.useTimestamps)},
+                {role: "good", text: " DEBUG"},
+                {role: "neutral", text: ": "},
+                {role: "dissabeld", text: message}
+            ], this.colorTheme, !this.useFormatting));
+        };
     };
 };
