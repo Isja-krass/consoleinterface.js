@@ -66,8 +66,18 @@ module.exports = class {
             ignoreClasses: [],
             logLevel: "error",
             includeStack: true,
-            includeSensitiveInformation: false,
             style: "text",
+        };
+
+        // default values for telemetry
+        this.telemetry = {
+            address: "000.000.000.0",
+            port: 1520,
+            sendDebug: false,
+            security: {
+                useEncryption: false,
+                symetricKey: "",
+            },
         };
 
     };
@@ -106,7 +116,6 @@ module.exports = class {
      * @param {string} options.igonoreClasses[] ignore speziffic classes for the webhook-client (default: none)
      * @param {"all"|"warning"|"error"|"fatal"} options.logLevel level of the webhook-client (default: "error")
      * @param {"text"|"embed"} options.style sets the display method (default: "text") 
-     * @param {boolean} options.includeSensitiveInformation include sensitive information (default: false)
      * @return {Promise<object>} webhook object as described in the Discord API-Docs
      */
     initWebhook (webhookURL, options) {
@@ -125,6 +134,19 @@ module.exports = class {
                 };
             });
         });
+    };
+
+    /**
+     * Initialise a telemetric connection, to request informations, warnings, errors etc.
+     * from a remote device via a multicast connection in real time.
+     * 
+     * **! PERSONAL, OR ANY OTHER KIND OF SENSITIVE INFORMATION MAY BE LEAKED TO PUBLIC OR THIRD PARTIES !**
+     * 
+     * @param {object} options options for telemetry connection
+     */
+    initTelemetry (options) {
+
+
     };
 
     /**

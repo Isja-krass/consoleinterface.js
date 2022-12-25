@@ -1,6 +1,6 @@
 {
     "name": "console-interface.js",
-    "version": "0.0.1",
+    "version": "0.0.1-dev",
     "displayName": "com.exposed.consoleinterface",
     "description": "The consoleinterface++ module from the PAUL toolkit portrtet to javascript.",
     "license": "MIT",
@@ -23,14 +23,11 @@
         "colors",
         "Visualization",
         "terminal",
-        "logfiles"
+        "logfiles",
+        "telemetry"
     ],
     "main": "consoleinterface.js",
     "scripts": {
-        "lint": ""
-    },
-    "dependencies": {
-        "fs": "",
-        "https": ""
+        "init": ""
     }
 }
